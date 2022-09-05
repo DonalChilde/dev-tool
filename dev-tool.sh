@@ -180,13 +180,13 @@ function lint() { ## Run mypy and pylint on project.
 }
 
 function lint:mypy() { ## Takes Arguments. Run mypy.
-    set +e
+    set +e # Allow bash to continue if there are errors.
     printf "Running mypy on %s\n" "${@}"
     python3 -m mypy "${@}"
 }
 
 function lint:pylint() { ## Takes Arguments. Run pylint.
-    set +e
+    set +e # Allow bash to continue if there are errors.
     printf "Running pylint on %s\n" "${@}"
     python3 -m pylint "${@}"
 }
@@ -223,8 +223,8 @@ function pip3:upgrade() { ## Takes arguments. Upgrade requested packages.
 }
 
 function pip3:upgrade:all() { ## Upgrade only packages found in either requirements file.
-    _pip3 install $(cat ./requirements.txt | sed /^\#/d | tr '\n' ' ') --upgrade
-    _pip3 install $(cat ./requirements_dev.txt | sed /^\#/d | tr '\n' ' ') --upgrade
+    _pip3 install --upgrade -r ./requirements.txt
+    _pip3 install --upgrade -r ./requirements_dev.txt
     # _pip3 install "$(pip list --outdated | tail +3 | grep -v sdist | awk '{ print $1 }')" --upgrade
 }
 
@@ -270,7 +270,7 @@ function venv:reset() { ## Remove and reinstall a venv including both requiremen
     venv:init:all
 }
 
-function _help() {
+function _help() { ## Uses python to parse out function name and help text.
     python3 - << EOF
 from pathlib import Path
 from operator import itemgetter
