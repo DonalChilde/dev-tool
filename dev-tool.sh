@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Master copy located at https://github.com/DonalChilde/dev-tool
-# Version 1.0
+# Version 0.1.0
 # 2021-03-15T16:27:09Z
 # Note: this script expects to be run from the top directory of a project.
 
@@ -14,11 +14,8 @@
 # -o pipefail If set, the return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully.
 set -euo pipefail
 
-# TODO make completions for script.
-# https://iridakos.com/programming/2018/03/01/bash-programmable-completion-tutorial
-# TODO add check to make sure that we are piping to the correct virtual env?
 
-PACKAGE="${PACKAGE:-aa_pbs_exporter}"
+PACKAGE="${PACKAGE:-INSERT_PROJECT_PACKAGE_NAME_HERE}"
 # SRC_PATH="src/"
 BROWSER="google-chrome"
 CODE_PATHS=("./src" "./tests")
