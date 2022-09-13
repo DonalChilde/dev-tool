@@ -216,9 +216,16 @@ echo "BASE_DEP=${BASE_DEP[@]}"
 
 }
 
-function completions() { ## Generate a completion file
+function completions() { ## Generate a completion file. Accepts a directory for output. defaults to pwd.
+    # Accepts a directory for output
+    if [ "$#" -ne 1 ] 
+    then
+        dir_path="$PWD"
+    else
+        dir_path="$1"
+    fi
 COMPLETION_COMMANDS="help completions settings generate-env"
-cat << EOF > $SCRIPT_NAME.completion
+cat << EOF > "$dir_path/$SCRIPT_NAME.completion"
 # An example of bash completion
 # File name: $SCRIPT_NAME.completion
 
@@ -259,8 +266,31 @@ EOF
 
 }
 
-function generate-env() {
-cat << EOF > $ENV_NAME
+function generate-env() { ## Generate an .env file. Accepts a directory for output. defaults to pwd.
+    # Accepts a directory for output
+    if [ "$#" -ne 1 ] 
+    then
+        dir_path="$PWD"
+    else
+        dir_path="$1"
+    fi
+    # Check if file exists, and approve overwrite.
+    if [ -f "$dir_path/$ENV_NAME" ]; then
+        echo "This will overwrite the current $ENV_NAME at:"
+        echo "$dir_path/$ENV_NAME"
+        read -p "Are you sure? (Y/N)" -n 1 -r
+        echo    # (optional) move to a new line
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+            echo # continue with the rest of the function
+        else
+            echo "Declined to overwrite $ENV_NAME"
+            exit 1
+        fi
+    fi
+    # Ensure any parent directories are created.
+    mkdir -p $dir_path && touch "$dir_path/$ENV_NAME"
+cat << EOF > "$dir_path/$ENV_NAME"
 # A settings file for $SCRIPT_NAME.sh
 
 # Place this file in the script directory, or the pwd.
@@ -287,6 +317,8 @@ cat << EOF > $ENV_NAME
 # VENV_PYTHON_VERSION="3.10"
 
 EOF
+
+echo "$ENV_NAME written to $(realpath $dir_path)"
 }
 
 
