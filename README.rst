@@ -16,6 +16,9 @@ Use curl or wget to download the script.
     # or
     wget https://raw.githubusercontent.com/DonalChilde/dev-tool/main/dev-tool.sh
 
+    # Download to a subdirectory
+    curl --create-dirs -O --output-dir ./scripts https://raw.githubusercontent.com/DonalChilde/dev-tool/main/dev-tool.sh
+
     # Then make executable
     chmod u+x ./dev-tool.sh
 
