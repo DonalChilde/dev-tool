@@ -67,17 +67,16 @@ fi
 PROJECT_DIR="${PROJECT_DIR:-$(realpath ".")}"
 SOURCE_PATH="${SOURCE_PATH:-'$PROJECT_DIR/src'}"
 TEST_PATH="${TEST_PATH:-'$PROJECT_DIR/tests'}"
-TOP_PACKAGE=${TOP_PACKAGE:-'SET_PACKAGE_NAME'} # Set the top level project package name
+TOP_PACKAGE="${TOP_PACKAGE:-'SET_PACKAGE_NAME'}" # Set the top level project package name
 
 ###########Python variables######################
 VENV_PYTHON_VERSION="${VENV_PYTHON_VERSION:-3.10}"
 VENV_LOCATION="${VENV_LOCATION:-$PROJECT_DIR/.venv}"
-PYTHON3_PATH="/bin/python3"
-VENV_PYTHON3=$VENV_LOCATION$PYTHON3_PATH
+VENV_PYTHON3="$VENV_LOCATION/bin/python3"
 
 ###########Dependency variables##################
-BASE_DEPENDENCIES=${BASE_DEPENDENCIES:-"pip setuptools wheel build pip-tools"}
-read -a BASE_DEP <<<$BASE_DEPENDENCIES # Split the string, allows passing by .env
+BUILD_DEPENDENCIES=${BUILD_DEPENDENCIES:-"pip setuptools wheel build pip-tools"}
+read -a BUILD_DEP <<<$BUILD_DEPENDENCIES # Split the string, allows passing by .env
 REQUIREMENTS_MAIN="${REQUIREMENTS_MAIN:-'$PROJECT_DIR/requirements.txt'}"
 REQUIREMENTS_DEV="${REQUIREMENTS_DEV:-'$PROJECT_DIR/requirements-dev.txt'}"
 
@@ -294,6 +293,7 @@ function venv-init() { ## Make a new project venv.
         echo "Failed to install a virtual environment, python3 not found at $VENV_PYTHON3."
         exit 1
     fi
+    dep-build
 }
 
 function venv-remove() { ## Delete the project venv.
@@ -337,8 +337,8 @@ function dep-upgrade() { ## Upgrade packages using pip.
     _pip3 install "${@}" --upgrade
 }
 
-function dep-init() { ## Upgrade the base build dependencies.
-    dep-upgrade "${BASE_DEP[@]}"
+function dep-build() { ## Upgrade the build dependencies.
+    dep-upgrade "${BUILD_DEP[@]}"
 }
 
 function dep-install-main() { ## Install the main requirements
@@ -431,8 +431,8 @@ function settings() { ## echo settings to terminal.
     echo "VENV_PYTHON3=$VENV_PYTHON3"
     echo "REQUIREMENTS_MAIN=$REQUIREMENTS_MAIN"
     echo "REQUIREMENTS_DEV=$REQUIREMENTS_DEV"
-    echo "BASE_DEPENDENCIES=$BASE_DEPENDENCIES"
-    echo "BASE_DEP=${BASE_DEP[@]}"
+    echo "BUILD_DEPENDENCIES=$BUILD_DEPENDENCIES"
+    echo "BUILD_DEP=${BUILD_DEP[@]}"
 
 }
 
@@ -443,7 +443,7 @@ function completions() { ## Generate a completion file. Accepts a directory for 
     else
         dir_path="$1"
     fi
-    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions dep-init dep-install dep-install-dev dep-install-main dep-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov settings tox venv-init venv-remove venv-reset venv-version"
+    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions dep-build dep-install dep-install-dev dep-install-main dep-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov settings tox venv-init venv-remove venv-reset venv-version"
     cat <<EOF >"$dir_path/$SCRIPT_NAME.completion"
 # An example of bash completion
 # File name: $SCRIPT_NAME.completion
@@ -512,21 +512,45 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 
 # Place this file in the script directory, or the pwd.
 # The pwd is searched before the script directory, and
-# the first file named .env_$SCRIPT_NAME is loaded.
+# the first file named $ENV_NAME is loaded.
+
+###########Project variables#####################
 
 # The project directory
 # Not required to be set, if dev-tool.sh is 
-# called from the project directory each time.
+# called from the project root directory each time.
 #
-# PROJECT_DIR=$(realpath ".")
+# PROJECT_DIR="."
 
 # The top directory for source files
 #
-# SOURCE_PATH="$PROJECT_DIR/src"
+# SOURCE_PATH="./src"
 
 # The top directory for test files
 #
-# TEST_PATH="$PROJECT_DIR/tests"
+# TEST_PATH="./tests"
+
+# The project root package name
+#   #####REQUIRED#####
+# TOP_PACKAGE="<SET_PACKAGE_NAME>"
+
+###########Python variables######################
+
+# The Python version to be used in the creation of 
+# virtual environments. must be installed on this machine.
+# e.g. "3", "3.10", "3.10.4"
+#
+# VENV_PYTHON_VERSION="3"
+
+# The location of the virtual environment. Used in the scripts
+# invocation of most python commands.
+#
+# VENV_LOCATION="./.venv"
+
+
+
+
+
 
 # The version of python used to create Virtual Environments
 # This is useful for systems with more than one python installed.
