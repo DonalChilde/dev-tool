@@ -5,7 +5,6 @@
 # Version 0.1.0
 # 2022-09-10 14:26:58
 
-
 # Ideas shamelessly lifted from:
 # https://github.com/nickjj/docker-flask-example/blob/main/run
 # https://github.com/audreyfeldroy/cookiecutter-pypackage/blob/master/%7B%7Bcookiecutter.project_slug%7D%7D/Makefile
@@ -15,20 +14,16 @@
 # https://github.com/scop/bash-completion
 # https://github.com/adriancooney/Taskfile
 
-
-
 # Add custom functions in the Custom Function section
 # Functions beginning with a letter or number will be included in the generated help output.
 # On the function definition line, text following ## will be treated as help text.
 # Update the completion generatior with appropriate completion info.
 # Update the .env generator if desired.
 
-
 # -e Exit immediately if a pipeline returns a non-zero status.
 # -u Treat unset variables and parameters other than the special parameters ‘@’ or ‘*’ as an error when performing parameter expansion.
 # -o pipefail If set, the return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully.
 set -euo pipefail
-
 
 #################################################
 #             script-base Variables             #
@@ -59,7 +54,7 @@ elif [ -f "$SCRIPT_DIR/$ENV_NAME" ]; then
     set +o allexport
     echo "Settings loaded from $ENV_PATH"
 else
-    echo ".env file not found."
+    echo "$ENV_NAME file not found. Using default settings."
 fi
 
 #################################################
@@ -74,13 +69,9 @@ VENV_LOCATION="${VENV_LOCATION:-$PROJECT_DIR/.venv}"
 PYTHON3_PATH="/bin/python3"
 VENV_PYTHON3=$VENV_LOCATION$PYTHON3_PATH
 
-
-
 #################################################
 #               Custom functions                #
 #################################################
-
-
 
 #################################################
 #               Common Functions                #
@@ -88,11 +79,11 @@ VENV_PYTHON3=$VENV_LOCATION$PYTHON3_PATH
 
 function _countdown() {
     # https://superuser.com/questions/611538/is-there-a-way-to-display-a-countdown-or-stopwatch-timer-in-a-terminal
-    # Display a countdown clock. 
+    # Display a countdown clock.
     # $1 = int seconds
-    date1=$((`date +%s` + $1));
-    while [ "$date1" -ge `date +%s` ]; do
-        echo -ne "$(date -u --date @$(($date1 - `date +%s`)) +%H:%M:%S)\r";
+    date1=$(($(date +%s) + $1))
+    while [ "$date1" -ge $(date +%s) ]; do
+        echo -ne "$(date -u --date @$(($date1 - $(date +%s))) +%H:%M:%S)\r"
         sleep 0.1
     done
 }
@@ -108,7 +99,7 @@ function help() { ## Get script help.
 }
 
 function _help() { ## Uses python to parse out function name and help text.
-    python3 - << EOF
+    python3 - <<EOF
 from pathlib import Path
 from operator import itemgetter
 import re
@@ -124,32 +115,52 @@ with open(script_path) as file:
 EOF
 }
 
+function _function-list() {
+    # A convenience function to generate a space delimited string of
+    # all the functions in this script.
+    python3 - <<EOF
+from pathlib import Path
+from operator import itemgetter
+import re
+script_path = Path("$SCRIPT_PATH")
+with open(script_path) as file:
+    functions = []
+    for line in file:
+        match = re.match(r'^function\s*([a-zA-Z0-9\:-]*)\(\)\s*{\s*##\s*(.*)', line)
+        if match is not None:
+            functions.append(match.groups())
+    target_list = []
+    for target, help in sorted(functions):
+        target_list.append(target)
+    print(" ".join(target_list))
+EOF
+}
+
 function settings() { ## echo settings to terminal.
 
-echo "PWD=$PWD"
-echo "SCRIPT_NAME=$SCRIPT_NAME"
-echo "ENV_NAME=$ENV_NAME"
-echo "SCRIPT_PATH=$SCRIPT_PATH"
+    echo "PWD=$PWD"
+    echo "SCRIPT_NAME=$SCRIPT_NAME"
+    echo "ENV_NAME=$ENV_NAME"
+    echo "SCRIPT_PATH=$SCRIPT_PATH"
 
-echo "PROJECT_DIR=$PROJECT_DIR"
-echo "SOURCE_PATH=$SOURCE_PATH"
-echo "TEST_PATH=$TEST_PATH"
-echo "VENV_PYTHON_VERSION=$VENV_PYTHON_VERSION"
-echo "VENV_LOCATION=$VENV_LOCATION"
-echo "VENV_PYTHON3=$VENV_PYTHON3"
+    echo "PROJECT_DIR=$PROJECT_DIR"
+    echo "SOURCE_PATH=$SOURCE_PATH"
+    echo "TEST_PATH=$TEST_PATH"
+    echo "VENV_PYTHON_VERSION=$VENV_PYTHON_VERSION"
+    echo "VENV_LOCATION=$VENV_LOCATION"
+    echo "VENV_PYTHON3=$VENV_PYTHON3"
 
 }
 
 function completions() { ## Generate a completion file. Accepts a directory for output. defaults to pwd.
     # Accepts a directory for output
-    if [ "$#" -ne 1 ] 
-    then
+    if [ "$#" -ne 1 ]; then
         dir_path="$PWD"
     else
         dir_path="$1"
     fi
-COMPLETION_COMMANDS="help completions settings generate-env"
-cat << EOF > "$dir_path/$SCRIPT_NAME.completion"
+    COMPLETION_COMMANDS="help completions settings generate-env"
+    cat <<EOF >"$dir_path/$SCRIPT_NAME.completion"
 # An example of bash completion
 # File name: $SCRIPT_NAME.completion
 
@@ -192,8 +203,7 @@ EOF
 
 function generate-env() { ## Generate an .env file. Accepts a directory for output. defaults to pwd.
     # Accepts a directory for output
-    if [ "$#" -ne 1 ] 
-    then
+    if [ "$#" -ne 1 ]; then
         dir_path="$PWD"
     else
         dir_path="$1"
@@ -203,9 +213,8 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
         echo "This will overwrite the current $ENV_NAME at:"
         echo "$dir_path/$ENV_NAME"
         read -p "Are you sure? (Y/N)" -n 1 -r
-        echo    # (optional) move to a new line
-        if [[ $REPLY =~ ^[Yy]$ ]]
-        then
+        echo # (optional) move to a new line
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo # continue with the rest of the function
         else
             echo "Declined to overwrite $ENV_NAME"
@@ -214,7 +223,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
     fi
     # Ensure any parent directories are created.
     mkdir -p $dir_path && touch "$dir_path/$ENV_NAME"
-cat << EOF > "$dir_path/$ENV_NAME"
+    cat <<EOF >"$dir_path/$ENV_NAME"
  # A settings file for $SCRIPT_NAME.sh
 
  # Place this file in the script directory, or the pwd.
@@ -227,10 +236,8 @@ cat << EOF > "$dir_path/$ENV_NAME"
  # default values for missing variables
 EOF
 
-echo "$ENV_NAME written to $(realpath $dir_path)"
+    echo "$ENV_NAME written to $(realpath $dir_path)"
 }
-
-
 
 # This idea is heavily inspired by: https://github.com/adriancooney/Taskfile
 # Runs the help function if no arguments given to script.
