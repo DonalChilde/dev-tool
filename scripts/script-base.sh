@@ -228,7 +228,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 
  # Place this file in the script directory, or the pwd.
  # The pwd is searched before the script directory, and
- # the first file named .env_$SCRIPT_NAME is loaded.
+ # the first file named $ENV_NAME is loaded.
 
  # Define variables here, e.g.
  # FOO="bar"
