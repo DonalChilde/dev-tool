@@ -67,7 +67,10 @@ fi
 PROJECT_DIR="${PROJECT_DIR:-$(realpath ".")}"
 SOURCE_PATH="${SOURCE_PATH:-'$PROJECT_DIR/src'}"
 TEST_PATH="${TEST_PATH:-'$PROJECT_DIR/tests'}"
-TOP_PACKAGE="${TOP_PACKAGE:-'SET_PACKAGE_NAME'}" # Set the top level project package name
+# Set the top level project package name
+# This value is only used to generate Sphinx documentation,
+# so script does not automatically fail if unset.
+TOP_PACKAGE="${TOP_PACKAGE:-'SET_PACKAGE_NAME'}"
 
 ###########Python variables######################
 VENV_PYTHON_VERSION="${VENV_PYTHON_VERSION:-3.10}"
@@ -531,7 +534,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 # TEST_PATH="./tests"
 
 # The project root package name
-#   #####REQUIRED#####
+# Required to generate apidoc with sphinx.
 # TOP_PACKAGE="<SET_PACKAGE_NAME>"
 
 ###########Python variables######################
@@ -547,15 +550,49 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 #
 # VENV_LOCATION="./.venv"
 
+###########Dependency variables##################
 
-
-
-
-
-# The version of python used to create Virtual Environments
-# This is useful for systems with more than one python installed.
+# The python packages required to build the project.
+# Some or all of these may also be requied in the 
+# requirements-dev.txt file
 #
-# VENV_PYTHON_VERSION="3.10"
+# BUILD_DEPENDENCIES="pip setuptools wheel build pip-tools"
+
+# The location of the requirements.txt file.
+#
+# REQUIREMENTS_MAIN="./requirements.txt"
+
+# The location of the requirements-dev.txt file
+#
+# REQUIREMENTS_DEV="./requirements-dev.txt"
+
+#############Sphinx variables####################
+
+# The Sphinx output directory
+#
+# DOC_BUILD_DIR="./docs/build"
+
+# The sphinx documentation source directory
+#
+# DOC_SRC_DIR="./docs/source"
+
+# The path to a web browser, used to view the generated documentation.
+#
+# BROWSER_PATH="/opt/google/chrome/chrome"
+
+#############Distribution variables##############
+
+# The path to the twine secrets .env file
+#
+# TWINE_SECRETS="./secrets/twine.env"
+
+# The path to the twine test secrets .env file
+# TWINE_TEST_SECRETS="./secrets/twine-test.env"
+
+# The dist directory, where wheels and sdist are built.
+#
+# DIST_DIR="./dist"
+
 
 EOF
 
