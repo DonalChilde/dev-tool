@@ -29,7 +29,7 @@ set -euo pipefail
 #             script-base Variables             #
 #################################################
 SCRIPT_NAME="base-script" # The script name without a file ending.
-ENV_NAME=".env-$SCRIPT_NAME"
+ENV_NAME=".$SCRIPT_NAME.env"
 SCRIPT_DIR=$(realpath $(dirname $0))
 SCRIPT_PATH=$(realpath $0)
 
