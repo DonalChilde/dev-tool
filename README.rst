@@ -12,12 +12,12 @@ Use curl or wget to download the script.
 .. code-block:: bash
 
     # Download to the current directory.
-    curl -O https://raw.githubusercontent.com/DonalChilde/dev-tool/main/dev-tool.sh
+    curl -O https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
     # or
-    wget https://raw.githubusercontent.com/DonalChilde/dev-tool/main/dev-tool.sh
+    wget https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
 
     # Download to a subdirectory
-    curl --create-dirs -O --output-dir ./scripts https://raw.githubusercontent.com/DonalChilde/dev-tool/main/dev-tool.sh
+    curl --create-dirs -O --output-dir ./scripts https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
 
     # Then make executable
     chmod u+x ./dev-tool.sh
