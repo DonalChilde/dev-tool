@@ -289,7 +289,7 @@ function tox() { ## Run tox.
 #################################################
 
 function venv-init() { ## Make a new project venv.
-    python${PYTHON_VENV_VERSION} -m venv ${VENV_LOCATION}
+    python${VENV_PYTHON_VERSION} -m venv ${VENV_LOCATION}
     if [ -f "$VENV_PYTHON3" ]; then
         printf "Installed a virtual environment at\n$(realpath $VENV_LOCATION)/\nusing $($VENV_PYTHON3 --version)."
     else
