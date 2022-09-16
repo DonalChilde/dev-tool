@@ -485,7 +485,7 @@ _$SCRIPT_NAME() { #  By convention, the function name is the command with an und
 # Use a function to get completions for the specified command
 complete -F _$SCRIPT_NAME $SCRIPT_NAME.sh
 EOF
-
+    echo "Save completion file to $dir_path/$SCRIPT_NAME.completion"
 }
 
 function generate-env() { ## Generate an .env file. Accepts a directory for output. defaults to pwd.
@@ -596,7 +596,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 
 EOF
 
-    echo "$ENV_NAME written to $(realpath $dir_path)"
+    echo "Saved .env file to $dir_path/$ENV_NAME"
 }
 
 # This idea is heavily inspired by: https://github.com/adriancooney/Taskfile
