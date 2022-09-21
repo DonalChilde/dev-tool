@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # Master copy located at https://github.com/DonalChilde/dev-tool
-# curl -O https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool-2.sh
+# curl -O https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
+# or
+# curl --create-dirs -O --output-dir ./scripts https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
 # Version 0.1.0
 # 2022-09-10 14:26:58
 
