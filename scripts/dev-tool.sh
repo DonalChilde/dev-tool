@@ -80,11 +80,13 @@ VENV_LOCATION="${VENV_LOCATION:-$PROJECT_DIR/.venv}"
 VENV_PYTHON3="$VENV_LOCATION/bin/python3"
 
 ###########Dependency variables##################
-BUILD_DEPENDENCIES=${BUILD_DEPENDENCIES:-"pip setuptools wheel build pip-tools"}
-read -a BUILD_DEP <<<$BUILD_DEPENDENCIES # Split the string, allows passing by .env
-REQUIREMENTS_MAIN="${REQUIREMENTS_MAIN:-'$PROJECT_DIR/requirements.txt'}"
-REQUIREMENTS_DEV="${REQUIREMENTS_DEV:-'$PROJECT_DIR/requirements-dev.txt'}"
-
+# BUILD_DEPENDENCIES=${BUILD_DEPENDENCIES:-"pip setuptools wheel build pip-tools"}
+# read -a BUILD_DEP <<<$BUILD_DEPENDENCIES # Split the string, allows passing by .env
+REQUIREMENTS_MAIN="${REQUIREMENTS_MAIN:-$PROJECT_DIR/requirements/main.txt}"
+REQUIREMENTS_DEV="${REQUIREMENTS_DEV:-$PROJECT_DIR/requirements/dev.txt}"
+# REQUIREMENTS_BUILD="${REQUIREMENTS_BUILD:-$PROJECT_DIR/requirements/build.txt}"
+# REQUIREMENTS_DOCS="${REQUIREMENTS_DOCS:-$PROJECT_DIR/requirements/docs.txt}"
+# REQUIREMENTS_VSCODE="${REQUIREMENTS_VSCODE:-$PROJECT_DIR/requirements/vscode.txt}"
 #############Sphinx variables####################
 DOC_BUILD_DIR=${DOC_BUILD_DIR:-"$PROJECT_DIR/docs/build"}
 DOC_SRC_DIR=${DOC_SRC_DIR:-"$PROJECT_DIR/docs/source"}
@@ -133,6 +135,62 @@ function clean-docs() { ## Clean the doc build directory.
     # https://unix.stackexchange.com/a/86950
     find $DOC_BUILD_DIR -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -rf
 
+}
+
+#################################################
+#          Dependency management                #
+#################################################
+
+function _pip3() {
+    $VENV_PYTHON3 -m pip "${@}"
+}
+
+function deps-install() { ## Install packages using pip.
+    _pip3 install "${@}"
+}
+
+function deps-outdated() { ## List outdated packages.
+    _pip3 list --outdated
+}
+
+function deps-upgrade() { ## Upgrade packages using pip.
+    _pip3 install "${@}" --upgrade
+}
+
+function deps-install-build() { ## Install the build dependencies.
+    deps-install $REQUIREMENTS_BUILD
+}
+
+function deps-install-main() { ## Install the main requirements
+    deps-install $REQUIREMENTS_MAIN
+}
+
+function deps-install-dev() { ## Install the dev requirements
+    deps_install $REQUIREMENTS_DEV
+}
+
+function deps-install-editable() { ## Install the project in editable mode.
+    deps-install -e $PROJECT_DIR
+    _pip3 check
+}
+
+function deps-init() { ## Install all dependencies
+    rm -rf $PROJECT_DIR/.tox
+    deps-upgrade -r $REQUIREMENTS_MAIN -r $REQUIREMENTS_DEV #-r $REQUIREMENTS_BUILD -r $REQUIREMENTS_DOCS -r $REQUIREMENTS_VSCODE
+    deps-install-editable
+
+}
+
+function deps-compile() { ## Pin dependencies from pyproject.toml into the requirements.txt files.
+    # $VENV_PYTHON3 -m piptools compile --allow-unsafe --build-isolation --generate-hashes --extra documentation --upgrade --resolver backtracking -o $REQUIREMENTS_DOCS $PROJECT_DIR/pyproject.toml
+    # $VENV_PYTHON3 -m piptools compile --allow-unsafe --build-isolation --generate-hashes --extra vscode --upgrade --resolver backtracking -o $REQUIREMENTS_VSCODE $PROJECT_DIR/pyproject.toml
+    # $VENV_PYTHON3 -m piptools compile --allow-unsafe --build-isolation --generate-hashes --extra build --upgrade --resolver backtracking -o $REQUIREMENTS_BUILD $PROJECT_DIR/pyproject.toml
+    $VENV_PYTHON3 -m piptools compile --allow-unsafe --build-isolation --generate-hashes --upgrade --resolver backtracking -o $REQUIREMENTS_MAIN $PROJECT_DIR/pyproject.toml
+    $VENV_PYTHON3 -m piptools compile --allow-unsafe --build-isolation --generate-hashes --extra dev --upgrade -o $REQUIREMENTS_DEV $PROJECT_DIR/pyproject.toml
+}
+
+function deps-sync() { ## Use piptools sync to set available packages in venv
+    $VENV_PYTHON3 -m piptools sync $REQUIREMENTS_MAIN $REQUIREMENTS_DEV $REQUIREMENTS_BUILD
 }
 
 #################################################
@@ -290,15 +348,15 @@ function tox() { ## Run tox.
 #          Virtual Environments                 #
 #################################################
 
-function venv-init() { ## Make a new project venv.
+function venv-init() { ## Make a new project venv, with updated pip, pip-tools, and setuptools.
     python${VENV_PYTHON_VERSION} -m venv ${VENV_LOCATION}
     if [ -f "$VENV_PYTHON3" ]; then
         printf "Installed a virtual environment at\n$(realpath $VENV_LOCATION)/\nusing $($VENV_PYTHON3 --version)."
+        deps-upgrade pip setuptools pip-tools
     else
         echo "Failed to install a virtual environment, python3 not found at $VENV_PYTHON3."
         exit 1
     fi
-    dep-build
 }
 
 function venv-remove() { ## Delete the project venv.
@@ -324,38 +382,6 @@ function venv-version() { ## Check the virtual environment python version.
     else
         printf "No python3 found at $(realpath $VENV_PYTHON)"
     fi
-}
-
-#################################################
-#          Dependency management                #
-#################################################
-
-function _pip3() {
-    $VENV_PYTHON3 -m pip "${@}"
-}
-
-function dep-install() { ## Install packages using pip.
-    _pip3 install "${@}"
-}
-
-function dep-upgrade() { ## Upgrade packages using pip.
-    _pip3 install "${@}" --upgrade
-}
-
-function dep-build() { ## Upgrade the build dependencies.
-    dep-upgrade "${BUILD_DEP[@]}"
-}
-
-function dep-install-main() { ## Install the main requirements
-    dep-install $REQUIREMENTS_MAIN
-}
-
-function dep-install-dev() { ## Install the dev requirements
-    dep_install $REQUIREMENTS_DEV
-}
-
-function dep-compile() {
-    echo "# pip-tool functions"
 }
 
 #################################################
@@ -448,7 +474,7 @@ function completions() { ## Generate a completion file. Accepts a directory for 
     else
         dir_path="$1"
     fi
-    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions dep-build dep-install dep-install-dev dep-install-main dep-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov settings tox venv-init venv-remove venv-reset venv-version"
+    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions deps-compile deps-init deps-install deps-install-build deps-install-dev deps-install-editable deps-install-main deps-outdated deps-sync deps-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov settings tox venv-init venv-remove venv-reset venv-version"
     cat <<EOF >"$dir_path/$SCRIPT_NAME.completion"
 # An example of bash completion
 # File name: $SCRIPT_NAME.completion
@@ -487,7 +513,7 @@ _$SCRIPT_NAME() { #  By convention, the function name is the command with an und
 # Use a function to get completions for the specified command
 complete -F _$SCRIPT_NAME $SCRIPT_NAME.sh
 EOF
-    echo "Save completion file to $dir_path/$SCRIPT_NAME.completion"
+    echo "Saved completion file to $dir_path/$SCRIPT_NAME.completion"
 }
 
 function generate-env() { ## Generate an .env file. Accepts a directory for output. defaults to pwd.
