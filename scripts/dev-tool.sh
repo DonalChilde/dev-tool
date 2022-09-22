@@ -4,8 +4,8 @@
 # curl -O https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
 # or
 # curl --create-dirs -O --output-dir ./scripts https://raw.githubusercontent.com/DonalChilde/dev-tool/main/scripts/dev-tool.sh
-# Version 0.1.0
-# 2022-09-10 14:26:58
+# Version 0.2.0
+# 2022-09-22T22:37:44Z
 
 # Ideas shamelessly lifted from:
 # https://github.com/nickjj/docker-flask-example/blob/main/run
