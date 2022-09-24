@@ -9,7 +9,7 @@
 
 # Ideas shamelessly lifted from:
 # https://github.com/nickjj/docker-flask-example/blob/main/run
-# https://github.com/audreyfeldroy/cookiecutter-pypackage/blob/master/%7B%7Bcookiecutter.project_slug%7D%7D/Makefile
+# https://github.com/audreyfeldroy/cookiecutter-pypackage
 # https://superuser.com/questions/611538/is-there-a-way-to-display-a-countdown-or-stopwatch-timer-in-a-terminal
 # https://www.gnu.org/software/gnuastro/manual/html_node/Bash-TAB-completion-tutorial.html
 # https://tldp.org/LDP/abs/html/tabexpansion.html
@@ -325,6 +325,26 @@ function lint-pylint() { ## Takes Arguments. Run pylint.
 }
 
 #################################################
+#              Source Control                   #
+#################################################
+
+function _pre-commit() {
+    $VENV_PYTHON3 -m pre_commit
+}
+
+function scm-precommit-update() { ## Run pre-commit autoupdate
+    _pre-commit autoupdate
+}
+
+function scm-precommit-install() { ## Install pre-commit
+    _pre-commit install
+}
+
+function scm-precommit-run() { ## Run precommit on all files
+    _pre-commit run --all-files
+}
+
+#################################################
 #                  Testing                      #
 #################################################
 
@@ -474,7 +494,7 @@ function completions() { ## Generate a completion file. Accepts a directory for 
     else
         dir_path="$1"
     fi
-    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions deps-compile deps-init deps-install deps-install-build deps-install-dev deps-install-editable deps-install-main deps-outdated deps-sync deps-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov settings tox venv-init venv-remove venv-reset venv-version"
+    COMPLETION_COMMANDS="clean clean-build clean-docs clean-pyc clean-test completions deps-compile deps-init deps-install deps-install-build deps-install-dev deps-install-editable deps-install-main deps-outdated deps-sync deps-upgrade dist-build dist-release dist-test-release docs-build docs-serve format format-black format-diff format-diff-black format-diff-isort format-isort generate-env help lint lint-mypy lint-pylint pytest pytest-cov scm-precommit-install scm-precommit-run scm-precommit-update settings tox venv-init venv-remove venv-reset venv-version"
     cat <<EOF >"$dir_path/$SCRIPT_NAME.completion"
 # An example of bash completion
 # File name: $SCRIPT_NAME.completion
@@ -496,7 +516,7 @@ _$SCRIPT_NAME() { #  By convention, the function name is the command with an und
   # Pointer to current completion word.
   # By convention, it's named "cur" but this isn't strictly necessary.
   local cur="\$2"
-  
+
   # Pointer to previous completion word.
   # By convention, it's named "prev" but this isn't strictly necessary.
   local prev="\$3"
@@ -548,7 +568,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 ###########Project variables#####################
 
 # The project directory
-# Not required to be set, if dev-tool.sh is 
+# Not required to be set, if dev-tool.sh is
 # called from the project root directory each time.
 #
 # PROJECT_DIR="."
@@ -567,7 +587,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 
 ###########Python variables######################
 
-# The Python version to be used in the creation of 
+# The Python version to be used in the creation of
 # virtual environments. must be installed on this machine.
 # e.g. "3", "3.10", "3.10.4"
 #
@@ -581,7 +601,7 @@ function generate-env() { ## Generate an .env file. Accepts a directory for outp
 ###########Dependency variables##################
 
 # The python packages required to build the project.
-# Some or all of these may also be requied in the 
+# Some or all of these may also be requied in the
 # requirements-dev.txt file
 #
 # BUILD_DEPENDENCIES="pip setuptools wheel build pip-tools"
